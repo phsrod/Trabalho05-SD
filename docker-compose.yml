@@ -1,0 +1,63 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: app
+      RABBITMQ_DEFAULT_PASS: app
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - messaging
+
+  producer:
+    build:
+      context: .
+      dockerfile: docker/producer.Dockerfile
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: app
+      RABBITMQ_PASSWORD: app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - messaging
+
+  sentiment-consumer:
+    build:
+      context: .
+      dockerfile: docker/sentiment.Dockerfile
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: app
+      RABBITMQ_PASSWORD: app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - messaging
+
+  support-consumer:
+    build:
+      context: .
+      dockerfile: docker/support.Dockerfile
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: app
+      RABBITMQ_PASSWORD: app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - messaging
+
+networks:
+  messaging:
+    driver: bridge
