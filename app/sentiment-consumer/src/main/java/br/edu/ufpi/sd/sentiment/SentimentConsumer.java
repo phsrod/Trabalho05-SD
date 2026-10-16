@@ -9,8 +9,6 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.DeliverCallback;
 
-import java.nio.charset.StandardCharsets;
-
 public final class SentimentConsumer {
     private SentimentConsumer() {
     }
